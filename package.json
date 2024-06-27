@@ -4,7 +4,8 @@
   "description": "Automated account creator for Discord, GitHub, Facebook, Twitter, and Instagram",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js"
+    "start": "node index.js",
+    "postinstall": "node -e \"require('puppeteer').install()\""
   },
   "author": "YUDAMODS",
   "license": "ISC",
