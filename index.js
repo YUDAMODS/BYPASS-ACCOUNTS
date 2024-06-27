@@ -57,7 +57,7 @@ async function extractVerificationCode(emailContent) {
     return codeMatch ? codeMatch[1] : null;
 }
 
-async function registerDiscord(email, password) {
+async function registerDiscord(email, password, emailPassword) {
     const browser = await puppeteer.launch({ headless: false });
     const page = await browser.newPage();
     await page.goto('https://discord.com/register');
@@ -88,7 +88,7 @@ async function registerDiscord(email, password) {
     await browser.close();
 }
 
-async function registerGithub(email, password) {
+async function registerGithub(email, password, emailPassword) {
     const browser = await puppeteer.launch({ headless: false });
     const page = await browser.newPage();
     await page.goto('https://github.com/join');
@@ -122,7 +122,7 @@ async function registerGithub(email, password) {
     await browser.close();
 }
 
-async function registerFacebook(email, password) {
+async function registerFacebook(email, password, emailPassword) {
     const browser = await puppeteer.launch({ headless: false });
     const page = await browser.newPage();
     await page.goto('https://www.facebook.com/');
@@ -161,7 +161,7 @@ async function registerFacebook(email, password) {
     await browser.close();
 }
 
-async function registerTwitter(email, password) {
+async function registerTwitter(email, password, emailPassword) {
     const browser = await puppeteer.launch({ headless: false });
     const page = await browser.newPage();
     await page.goto('https://twitter.com/i/flow/signup');
@@ -197,7 +197,7 @@ async function registerTwitter(email, password) {
     await browser.close();
 }
 
-async function registerInstagram(email, password) {
+async function registerInstagram(email, password, emailPassword) {
     const browser = await puppeteer.launch({ headless: false });
     const page = await browser.newPage();
     await page.goto('https://www.instagram.com/accounts/emailsignup/');
@@ -221,65 +221,68 @@ async function registerInstagram(email, password) {
             await page.goto(verificationLink);
             console.log('Instagram account verified:', email);
 
-                       fs.appendFileSync('accounts.txt', `Instagram - Email: ${email}, Password: ${password}\n`);
-       } else {
-           console.log('Failed to get verification email for Instagram:', email);
-       }
+            fs.appendFileSync('accounts.txt', `Instagram - Email: ${email}, Password: ${password}\n`);
+        } else {
+            console.log('Failed to get verification link for Instagram:', email);
+        }
+    } else {
+        console.log('Failed to get verification email for Instagram:', email);
+    }
 
-       await browser.close();
-   }
+    await browser.close();
+}
 
-   async function main() {
-       const { accountType } = await inquirer.prompt([
-           {
-               type: 'list',
-               name: 'accountType',
-               message: 'Select the type of account to generate:',
-               choices: ['Discord', 'GitHub', 'Facebook', 'Twitter', 'Instagram']
-           }
-       ]);
+async function main() {
+    const { accountType } = await inquirer.prompt([
+        {
+            type: 'list',
+            name: 'accountType',
+            message: 'Select the type of account to generate:',
+            choices: ['Discord', 'GitHub', 'Facebook', 'Twitter', 'Instagram']
+        }
+    ]);
 
-       while (true) {
-           try {
-               const { email, password: emailPassword } = await createTempEmailAccount();
-               const password = crypto.randomBytes(10).toString('hex');
+    while (true) {
+        try {
+            const { email, password: emailPassword } = await createTempEmailAccount();
+            const password = crypto.randomBytes(10).toString('hex');
 
-               switch (accountType) {
-                   case 'Discord':
-                       await registerDiscord(email, password, emailPassword);
-                       break;
-                   case 'GitHub':
-                       await registerGithub(email, password, emailPassword);
-                       break;
-                   case 'Facebook':
-                       await registerFacebook(email, password, emailPassword);
-                       break;
-                   case 'Twitter':
-                       await registerTwitter(email, password, emailPassword);
-                       break;
-                   case 'Instagram':
-                       await registerInstagram(email, password, emailPassword);
-                       break;
-               }
+            switch (accountType) {
+                case 'Discord':
+                    await registerDiscord(email, password, emailPassword);
+                    break;
+                case 'GitHub':
+                    await registerGithub(email, password, emailPassword);
+                    break;
+                case 'Facebook':
+                    await registerFacebook(email, password, emailPassword);
+                    break;
+                case 'Twitter':
+                    await registerTwitter(email, password, emailPassword);
+                    break;
+                case 'Instagram':
+                    await registerInstagram(email, password, emailPassword);
+                    break;
+            }
 
-               console.log(`Account details saved: ${email} | ${password}`);
-           } catch (error) {
-               console.error('Error creating account:', error);
-           }
+            console.log(`Account details saved: ${email} | ${password}`);
+        } catch (error) {
+            console.error('Error creating account:', error);
+        }
 
-           const { continueCreating } = await inquirer.prompt([
-               {
-                   type: 'confirm',
-                   name: 'continueCreating',
-                   message: 'Do you want to create another account?',
-                   default: true
-               }
-           ]);
+        const { continueCreating } = await inquirer.prompt([
+            {
+                type: 'confirm',
+                name: 'continueCreating',
+                message: 'Do you want to create another account?',
+                default: true
+            }
+        ]);
 
-           if (!continueCreating) {
-               break;
-           }
-       }
-   }
+        if (!continueCreating) {
+            break;
+        }
+    }
+}
 
-   main();
+main();
